@@ -28,7 +28,7 @@ function renderShopList(data) {
   if (data.length === 0) {
     shoppingList.classList.add("empty-page-content");
   } else {
-    shoppingList.classList.remove("empty-page-content");
+    shoppingList.classList.remove("empty-page-content"); //
     // Render shopping list data here
   }
 
@@ -155,4 +155,59 @@ document.addEventListener("DOMContentLoaded", function () {
   initPagination(books.length);
 
   renderShopList(getBooksForPage(books, 1));
+});
+
+/*****************/
+
+const apiUrl = "https://books-backend.p.goit.global/api/books";
+
+// Функція для отримання списку книг з API
+async function fetchBooks() {
+  try {
+    const response = await fetch(apiUrl);
+    if (!response.ok) {
+      throw new Error("Failed to fetch books");
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching books:", error);
+    return [];
+  }
+}
+
+// Функція для відображення списку книг на сторінці
+function renderBooks(books) {
+  const bookList = document.querySelector(".book-list");
+  if (!bookList) {
+    console.error("Element with class 'book-list' not found.");
+    return;
+  }
+  bookList.innerHTML = ""; // Очищення списку книг перед відображенням нових
+  if (books.length === 0) {
+    bookList.innerHTML = "<p>No books found</p>";
+    return;
+  }
+  books.forEach((book) => {
+    const bookItem = document.createElement("div");
+    bookItem.classList.add("book-item");
+
+    // Додавання інформації про книгу до елементу
+    bookItem.innerHTML = `
+      <img src="${book.book_image}" alt="${book.title}" />
+      <h2>${book.title}</h2>
+      <p>${book.author}</p>
+      <p>${book.description}</p>
+      <a href="${book.buy_links.amazon_link}" target="_blank">Buy on Amazon</a>
+      <a href="${book.buy_links.apple_books_link}" target="_blank">Buy on Apple Books</a>
+    `;
+    bookList.appendChild(bookItem);
+  });
+}
+
+// При натисканні кнопки "Show Books" виконується запит і відображення книг
+const showBooksButton = document.getElementById("showBooksButton");
+showBooksButton.addEventListener("click", async () => {
+  const books = await fetchBooks();
+  renderBooks(books);
 });
